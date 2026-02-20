@@ -1,4 +1,5 @@
 import math
+from tkinter import font
 
 def calculate(bore_in, rod_in, pressure_psi, flow_gpm):
     """
@@ -64,3 +65,14 @@ def run_gui():
             )
         
         return e
+
+# TITLE BAR
+title_bar = tk.Frame(root, bg=ACCENT, pady=8)
+title_bar.pack(fill="x")
+tk.Label(
+    title_bar, 
+    text="Hydraulic Cylinder Calculator",
+    bg=ACCENT,
+    fg="#0d1117",
+    font=("SEGOE UI", 13, "bold")
+).pack()

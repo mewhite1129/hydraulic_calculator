@@ -1,5 +1,6 @@
 import math
 from tkinter import font
+from turtle import fill
 
 def calculate(bore_in, rod_in, pressure_psi, flow_gpm):
     """
@@ -76,3 +77,7 @@ tk.Label(
     fg="#0d1117",
     font=("SEGOE UI", 13, "bold")
 ).pack()
+
+# INPUT CARD
+card = tk.Frame(root, bg=CARD, padx=24, pady=20)
+card.pack(padx=16, pady=(14, 6), fill="x")

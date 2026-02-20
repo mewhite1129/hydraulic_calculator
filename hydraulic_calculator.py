@@ -81,3 +81,40 @@ tk.Label(
 # INPUT CARD
 card = tk.Frame(root, bg=CARD, padx=24, pady=20)
 card.pack(padx=16, pady=(14, 6), fill="x")
+
+fields = [
+    ("Bore Diameter (in)", "in", "e.g. 4.0"),
+    ("Rod Diameter (in)", "in", "e.g. 2.5"),
+    ("Pressure (psi)", "PSI", "e.g. 2500"),
+    ("Flow Rate (gpm)", "GPM", "e.g. 10"),
+]
+
+entries = []
+
+label(card, text="INPUTS", bg=CARD, fg=ACCENT, font=("Segoe UI", 8, "bold")).grid(row=0, column=0, columnspan=3, sticky="w", pady=(0, 10))
+
+for i, (name, unit, hint) in enumerate(fields):
+    label(card, f"{name}", bg=CARD).grid(row=i+1, column=0, sticky="w", pady=5)
+    e = entry(card)
+    e.insert(0, hint)
+    e.config(fg=MUTED)
+
+    def on_focus_in(ev, widget=e, placeholder=hint):
+            if widget.get() == placeholder:
+                widget.delete(0, "end")
+                widget.config(fg=TEXT)
+
+    def on_focus_out(ev, widget=e, placeholder=hint):
+        if widget.get() == "":
+            widget.insert(0, placeholder)
+            widget.config(fg=MUTED)
+
+    e.bind("<FocusIn>",  on_focus_in)
+    e.bind("<FocusOut>", on_focus_out)
+    e.grid(row=i+1, column=1, padx=10, pady=5)
+    label(card, unit, bg=CARD, fg=MUTED).grid(row=i+1,column=2, sticky="w")
+    entries.append(e)
+
+    bore_e, rod_e, pres_e, flow_e = entries
+
+    

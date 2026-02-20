@@ -113,6 +113,7 @@ for i, (name, unit, hint) in enumerate(fields):
     e.bind("<FocusOut>", on_focus_out)
     e.grid(row=i+1, column=1, padx=10, pady=5)
     label(card, unit, bg=CARD, fg=MUTED).grid(row=i+1,column=2, sticky="w")
+
     entries.append(e)
 
     bore_e, rod_e, pres_e, flow_e = entries
@@ -148,3 +149,13 @@ for i, (name, unit, hint) in enumerate(fields):
             textvariable=var, 
             bg=CARD, fg=color, font=("Segoe UI", 11, "bold"), width=12, anchor="e").grid(row=i+1, column=1, padx=10)
         label(res_card, unit, bg=CARD, fg=MUTED).grid(row=i+1, column=2, sticky="w")
+
+# SEPARATOR INFO LINE
+info_var = tk.StringVar(value="")
+tk.Label(
+    res_card,
+    textvariable=info_var,
+    bg=CARD,
+    fg=MUTED,
+    font=("Segoe UI", 8)).grid(row=6, column=0, columnspan=3, sticky="w", pady=(10, 0)
+    )    

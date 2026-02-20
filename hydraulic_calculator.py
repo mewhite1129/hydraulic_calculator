@@ -16,3 +16,23 @@ def calculate(bore_in, rod_in, pressure_psi, flow_gpm):
     retract_speed = flow_in3 / annulus                 # in/min
 
     return extend_force, retract_force, extend_speed, retract_speed
+
+import tkinter as tk
+from tkinter import ttk
+
+def run_gui():
+    root = tk.Tk()
+    root.title("Hydraulic Cylinder Calculator")
+    root.resizable(False, False)
+
+    # STYLES
+    BG      = "#1e2130"
+    CARD    = "#272b3d"
+    ACCENT  = "#4fc3f7"
+    TEXT    = "#e0e6f0"
+    MUTED   = "#8a93b0"
+    GREEN   = "#69f0ae"
+    YELLOW  = "#ffd740"
+    FONT    = ("Segoe UI", 10)
+    BOLD    = ("Segoe UI", 10, "bold")
+    HEAD    = ("Segoe UI", 13, "bold")

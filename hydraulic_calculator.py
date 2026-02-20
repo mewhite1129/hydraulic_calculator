@@ -36,3 +36,31 @@ def run_gui():
     FONT    = ("Segoe UI", 10)
     BOLD    = ("Segoe UI", 10, "bold")
     HEAD    = ("Segoe UI", 13, "bold")
+
+    root.configure(bg=BG)
+
+    def label(parent, text, **kw):
+        return tk.Label(
+            parent, 
+            text=text, 
+            bg=kw.pop("bg", CARD), 
+            fg=kw.pop("fg", TEXT), 
+            font=kw.pop("font", FONT), 
+            **kw
+            )
+    
+    def entry(parent):
+        e = tk.Entry(
+            parent, 
+            bg="#323757", 
+            fg=TEXT, 
+            font=FONT, 
+            insertbackground=ACCENT,
+            relief="flat",
+            width=14,
+            highlightthickness=1,
+            highlightcolor=ACCENT,
+            highlightbackground=MUTED
+            )
+        
+        return e

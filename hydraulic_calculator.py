@@ -159,3 +159,21 @@ tk.Label(
     fg=MUTED,
     font=("Segoe UI", 8)).grid(row=6, column=0, columnspan=3, sticky="w", pady=(10, 0)
     )    
+
+# CALCULATE BUTTON
+
+def on_calculate():
+    placeholders = [f[2] for f in fields]
+    try:
+        vals = []
+        for e, ph in zip(entries, placeholders):
+            raw = e.get().strip()
+            if raw == ph:
+                raise ValueError("Fill in all fields.")
+            vals.append(float(raw))
+
+        bore, rod, pres, flow = vals
+        if rod >= bore:
+            raise ValueError("Rod diameter must be less than bore diameter.")
+        if any(v <= 0 for v in vals):
+            raise ValueError("All values must be positive.")       

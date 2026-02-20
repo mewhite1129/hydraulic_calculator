@@ -117,4 +117,34 @@ for i, (name, unit, hint) in enumerate(fields):
 
     bore_e, rod_e, pres_e, flow_e = entries
 
-    
+#  RESULTS
+    res_card = tk.Frame(root, bg=CARD, padx=24, pady=16)
+    res_card.pack(padx=16, pady=6, fill="x")
+
+    label(
+        res_card, 
+        "RESULTS", 
+        bg=CARD, 
+        fg=ACCENT, 
+        font=("Segoe UI", 8, "bold")).grid(row=0, column=0, columnspan=3, sticky="w", pady=(0, 8))
+
+    result_data = [
+        ("Extend Force",  GREEN,  "lbf"),
+        ("Retract Force", YELLOW, "lbf"),
+        ("Extend Speed",  GREEN,  "in/min"),
+        ("Retract Speed", YELLOW, "in/min"),
+    ]
+    result_vars = [tk.StringVar(value="—") for _ in result_data]
+
+    for i, ((name, color, unit), var) in enumerate(zip(result_data, result_vars)):
+        label(
+            res_card, 
+            f"{name}", 
+            bg=CARD, 
+            fg=MUTED).grid(row=i+1, column=0, sticky="w", pady=4
+            )
+        tk.Label(
+            res_card, 
+            textvariable=var, 
+            bg=CARD, fg=color, font=("Segoe UI", 11, "bold"), width=12, anchor="e").grid(row=i+1, column=1, padx=10)
+        label(res_card, unit, bg=CARD, fg=MUTED).grid(row=i+1, column=2, sticky="w")

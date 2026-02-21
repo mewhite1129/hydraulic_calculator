@@ -196,3 +196,36 @@ def on_calculate():
 
     except ValueError as ex:
         messagebox.showerror("Input Error", str(ex))
+
+btn_frame = tk.Frame(root, bg=BG, pady=10)
+btn_frame.pack()
+
+calc_btn = tk.Button(
+    btn_frame,
+    text="Calculate",
+    bg=ACCENT,
+    fg="#0d1117",
+    font=("Segoe UI", 11, "bold"),
+    relief="flat",
+    padx=20,
+    pady=8,
+    command=on_calculate,
+    cursor="hand2",
+    activebackground="#81d4fa",
+    activeforeground="#0d1117",
+)
+calc_btn.pack(side="left", padx=6)
+
+clear_btn = tk.Button(
+    btn_frame,
+    text="Clear",
+    bg=CARD,
+    fg=MUTED,
+    font=("Segoe UI", 10),
+    relief="flat",
+    padx=14,
+    pady=8,
+    command=lambda: [v.set("—") for v in result_vars] or info_var.set(""),
+    cursor="hand2",   
+)
+clear_btn.pack(side="left", padx=6)

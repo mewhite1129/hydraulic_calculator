@@ -1,6 +1,5 @@
 import math
-from tkinter import font, messagebox
-from turtle import fill
+from tkinter import messagebox
 
 
 def calculate(bore_in, rod_in, pressure_psi, flow_gpm):
@@ -92,34 +91,32 @@ def run_gui():
         ("Flow Rate (gpm)", "GPM", "e.g. 10"),
     ]
 
+    entries = []
 
-entries = []
+    label(card, text="INPUTS", bg=CARD, fg=ACCENT, font=("Segoe UI", 8, "bold")).grid(
+        row=0, column=0, columnspan=3, sticky="w", pady=(0, 10)
+    )
 
-label(card, text="INPUTS", bg=CARD, fg=ACCENT, font=("Segoe UI", 8, "bold")).grid(
-    row=0, column=0, columnspan=3, sticky="w", pady=(0, 10)
-)
+    for i, (name, unit, hint) in enumerate(fields):
+        label(card, f"{name}", bg=CARD).grid(row=i + 1, column=0, sticky="w", pady=5)
+        e = entry(card)
+        e.insert(0, hint)
+        e.config(fg=MUTED)
 
-for i, (name, unit, hint) in enumerate(fields):
-    label(card, f"{name}", bg=CARD).grid(row=i + 1, column=0, sticky="w", pady=5)
-    e = entry(card)
-    e.insert(0, hint)
-    e.config(fg=MUTED)
+        def on_focus_in(ev, widget=e, placeholder=hint):
+            if widget.get() == placeholder:
+                widget.delete(0, "end")
+                widget.config(fg=TEXT)
 
-    def on_focus_in(ev, widget=e, placeholder=hint):
-        if widget.get() == placeholder:
-            widget.delete(0, "end")
-            widget.config(fg=TEXT)
+        def on_focus_out(ev, widget=e, placeholder=hint):
+            if widget.get() == "":
+                widget.insert(0, placeholder)
+                widget.config(fg=MUTED)
 
-    def on_focus_out(ev, widget=e, placeholder=hint):
-        if widget.get() == "":
-            widget.insert(0, placeholder)
-            widget.config(fg=MUTED)
-
-    e.bind("<FocusIn>", on_focus_in)
-    e.bind("<FocusOut>", on_focus_out)
-    e.grid(row=i + 1, column=1, padx=10, pady=5)
+        e.bind("<FocusIn>", on_focus_in)
+        e.bind("<FocusOut>", on_focus_out)
+        e.grid(row=i + 1, column=1, padx=10, pady=5)
     label(card, unit, bg=CARD, fg=MUTED).grid(row=i + 1, column=2, sticky="w")
-
     entries.append(e)
 
     bore_e, rod_e, pres_e, flow_e = entries
@@ -155,77 +152,94 @@ for i, (name, unit, hint) in enumerate(fields):
         ).grid(row=i + 1, column=1, padx=10)
         label(res_card, unit, bg=CARD, fg=MUTED).grid(row=i + 1, column=2, sticky="w")
 
-# SEPARATOR INFO LINE
-info_var = tk.StringVar(value="")
-tk.Label(res_card, textvariable=info_var, bg=CARD, fg=MUTED, font=("Segoe UI", 8)).grid(
-    row=6, column=0, columnspan=3, sticky="w", pady=(10, 0)
-)
+    # SEPARATOR INFO LINE
+    info_var = tk.StringVar(value="")
+    tk.Label(
+        res_card, textvariable=info_var, bg=CARD, fg=MUTED, font=("Segoe UI", 8)
+    ).grid(row=6, column=0, columnspan=3, sticky="w", pady=(10, 0))
 
-# CALCULATE BUTTON
+    # CALCULATE BUTTON
 
-def on_calculate():
-    placeholders = [f[2] for f in fields]
-    try:
-        vals = []
-        for e, ph in zip(entries, placeholders):
-            raw = e.get().strip()
-            if raw == ph:
-                raise ValueError("Fill in all fields.")
-            vals.append(float(raw))
+    def on_calculate():
+        placeholders = [f[2] for f in fields]
+        try:
+            vals = []
+            for e, ph in zip(entries, placeholders):
+                raw = e.get().strip()
+                if raw == ph:
+                    raise ValueError("Fill in all fields.")
+                vals.append(float(raw))
 
-        bore, rod, pres, flow = vals
-        if rod >= bore:
-            raise ValueError("Rod diameter must be less than bore diameter.")
-        if any(v <= 0 for v in vals):
-            raise ValueError("All values must be positive.")
+            bore, rod, pres, flow = vals
+            if rod >= bore:
+                raise ValueError("Rod diameter must be less than bore diameter.")
+            if any(v <= 0 for v in vals):
+                raise ValueError("All values must be positive.")
 
-        ef, rf, es, rs = calculate(bore, rod, pres, flow)
+            ef, rf, es, rs = calculate(bore, rod, pres, flow)
 
-        result_vars[0].set(f"{ef:,.1f}")
-        result_vars[1].set(f"{rf:,.1f}")
-        result_vars[2].set(f"{es:,.2f}")
-        result_vars[3].set(f"{rs:,.2f}")
+            result_vars[0].set(f"{ef:,.1f}")
+            result_vars[1].set(f"{rf:,.1f}")
+            result_vars[2].set(f"{es:,.2f}")
+            result_vars[3].set(f"{rs:,.2f}")
 
-        bore_area = math.pi * (bore / 2) ** 2
-        rod_area = math.pi * (rod / 2) ** 2
-        info_var.set(
-            f"Bore Area: {bore_area:.3f} in² |  "
-            f"Annulus  area: {bore_area - rod_area:.3f} in² |  "
-            f"Flow: {flow * 231:.1f} in³/min"
-        )
+            bore_area = math.pi * (bore / 2) ** 2
+            rod_area = math.pi * (rod / 2) ** 2
+            info_var.set(
+                f"Bore Area: {bore_area:.3f} in² |  "
+                f"Annulus  area: {bore_area - rod_area:.3f} in² |  "
+                f"Flow: {flow * 231:.1f} in³/min"
+            )
 
-    except ValueError as ex:
-        messagebox.showerror("Input Error", str(ex))
+        except ValueError as ex:
+            messagebox.showerror("Input Error", str(ex))
 
-btn_frame = tk.Frame(root, bg=BG, pady=10)
-btn_frame.pack()
+    btn_frame = tk.Frame(root, bg=BG, pady=10)
+    btn_frame.pack()
 
-calc_btn = tk.Button(
-    btn_frame,
-    text="Calculate",
-    bg=ACCENT,
-    fg="#0d1117",
-    font=("Segoe UI", 11, "bold"),
-    relief="flat",
-    padx=20,
-    pady=8,
-    command=on_calculate,
-    cursor="hand2",
-    activebackground="#81d4fa",
-    activeforeground="#0d1117",
-)
-calc_btn.pack(side="left", padx=6)
+    calc_btn = tk.Button(
+        btn_frame,
+        text="Calculate",
+        bg=ACCENT,
+        fg="#0d1117",
+        font=("Segoe UI", 11, "bold"),
+        relief="flat",
+        padx=20,
+        pady=8,
+        command=on_calculate,
+        cursor="hand2",
+        activebackground="#81d4fa",
+        activeforeground="#0d1117",
+    )
+    calc_btn.pack(side="left", padx=6)
 
-clear_btn = tk.Button(
-    btn_frame,
-    text="Clear",
-    bg=CARD,
-    fg=MUTED,
-    font=("Segoe UI", 10),
-    relief="flat",
-    padx=14,
-    pady=8,
-    command=lambda: [v.set("—") for v in result_vars] or info_var.set(""),
-    cursor="hand2",   
-)
-clear_btn.pack(side="left", padx=6)
+    clear_btn = tk.Button(
+        btn_frame,
+        text="Clear",
+        bg=CARD,
+        fg=MUTED,
+        font=("Segoe UI", 10),
+        relief="flat",
+        padx=14,
+        pady=8,
+        command=lambda: [v.set("—") for v in result_vars] or info_var.set(""),
+        cursor="hand2",
+    )
+    clear_btn.pack(side="left", padx=6)
+
+    # Bind Enter key to calculate
+    root.bind("<Return>", lambda e: on_calculate())
+
+    # FOOTER
+    tk.Label(
+        root,
+        text="Units: inches · PSI · GPM → lbf · in/min",
+        bg=BG,
+        fg=MUTED,
+        font=("Segoe UI", 8),
+    ).pack(pady=(0, 10))
+
+    root.mainloop()
+
+    if __name__ == "__main__":
+        run_gui()

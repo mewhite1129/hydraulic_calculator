@@ -1,5 +1,5 @@
 import math
-from tkinter import font
+from tkinter import font, messagebox
 from turtle import fill
 
 
@@ -177,5 +177,22 @@ def on_calculate():
         if rod >= bore:
             raise ValueError("Rod diameter must be less than bore diameter.")
         if any(v <= 0 for v in vals):
-            raise ValueError("All values must be positive.")       
+            raise ValueError("All values must be positive.")
 
+        ef, rf, es, rs = calculate(bore, rod, pres, flow)
+
+        result_vars[0].set(f"{ef:,.1f}")
+        result_vars[1].set(f"{rf:,.1f}")
+        result_vars[2].set(f"{es:,.2f}")
+        result_vars[3].set(f"{rs:,.2f}")
+
+        bore_area = math.pi * (bore / 2) ** 2
+        rod_area = math.pi * (rod / 2) ** 2
+        info_var.set(
+            f"Bore Area: {bore_area:.3f} in² |  "
+            f"Annulus  area: {bore_area - rod_area:.3f} in² |  "
+            f"Flow: {flow * 231:.1f} in³/min"
+        )
+
+    except ValueError as ex:
+        messagebox.showerror("Input Error", str(ex))

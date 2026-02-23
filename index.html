@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Hydraulic Calc" />
+  <meta name="theme-color" content="#4fc3f7" />
+  <title>Hydraulic Cylinder Calculator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #1e2130;
+      --card:     #272b3d;
+      --accent:   #4fc3f7;
+      --text:     #e0e6f0;
+      --muted:    #8a93b0;
+      --green:    #69f0ae;
+      --yellow:   #ffd740;
+      --entry-bg: #323757;
+      --border:   #3d4460;
+      --radius:   10px;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Barlow', sans-serif;
+      font-size: 16px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-bottom: 40px;
+    }
+
+    /* ── HEADER ── */
+    header {
+      width: 100%;
+      background: var(--accent);
+      padding: 14px 20px;
+      text-align: center;
+    }
+
+    header h1 {
+      font-family: 'Barlow', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #0d1117;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    /* ── MAIN CONTAINER ── */
+    main {
+      width: 100%;
+      max-width: 480px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* ── CARDS ── */
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 20px 20px 24px;
+      border: 1px solid var(--border);
+    }
+
+    .card-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    /* ── INPUTS ── */
+    .field {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .field:last-child { margin-bottom: 0; }
+
+    .field label {
+      font-size: 0.875rem;
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .field input {
+      background: var(--entry-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.95rem;
+      padding: 9px 10px;
+      width: 110px;
+      text-align: right;
+      outline: none;
+      transition: border-color 0.15s;
+      -webkit-appearance: none;
+    }
+
+    .field input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(79,195,247,0.15);
+    }
+
+    .field input.placeholder {
+      color: var(--muted);
+    }
+
+    .field .unit {
+      font-size: 0.8rem;
+      color: var(--muted);
+      font-family: 'Share Tech Mono', monospace;
+      width: 32px;
+    }
+
+    /* ── RESULTS ── */
+    .result-row {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+
+    .result-row:last-of-type { border-bottom: none; }
+
+    .result-row .result-label {
+      font-size: 0.875rem;
+      color: var(--muted);
+    }
+
+    .result-row .result-value {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 1.1rem;
+      font-weight: 600;
+      text-align: right;
+      min-width: 110px;
+      transition: color 0.2s;
+    }
+
+    .result-row .result-unit {
+      font-size: 0.78rem;
+      color: var(--muted);
+      font-family: 'Share Tech Mono', monospace;
+      width: 40px;
+    }
+
+    .green  { color: var(--green); }
+    .yellow { color: var(--yellow); }
+    .dash   { color: var(--muted); }
+
+    /* ── INFO LINE ── */
+    .info-line {
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--muted);
+      line-height: 1.6;
+      min-height: 20px;
+    }
+
+    /* ── BUTTONS ── */
+    .btn-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    button {
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: 'Barlow', sans-serif;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: 0.03em;
+      transition: opacity 0.15s, transform 0.1s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    button:active { transform: scale(0.97); }
+
+    #btn-calculate {
+      flex: 1;
+      background: var(--accent);
+      color: #0d1117;
+      padding: 14px;
+    }
+
+    #btn-calculate:hover { opacity: 0.9; }
+
+    #btn-clear {
+      background: var(--card);
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: 14px 20px;
+    }
+
+    #btn-clear:hover { color: var(--text); }
+
+    /* ── ERROR ── */
+    .error-box {
+      background: rgba(255, 82, 82, 0.12);
+      border: 1px solid rgba(255, 82, 82, 0.35);
+      border-radius: 8px;
+      color: #ff8a80;
+      font-size: 0.875rem;
+      padding: 12px 14px;
+      display: none;
+    }
+
+    .error-box.visible { display: block; }
+
+    /* ── FOOTER ── */
+    footer {
+      margin-top: 8px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--muted);
+      text-align: center;
+      opacity: 0.6;
+    }
+
+    /* ── INSTALL BANNER (shown only on mobile) ── */
+    #install-banner {
+      display: none;
+      width: 100%;
+      max-width: 480px;
+      padding: 0 16px;
+    }
+
+    #install-banner .banner-inner {
+      background: rgba(79,195,247,0.08);
+      border: 1px solid rgba(79,195,247,0.25);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 0.8rem;
+      color: var(--accent);
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 600px) {
+      #install-banner { display: block; }
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes pop {
+      0%   { transform: scale(0.95); opacity: 0.4; }
+      60%  { transform: scale(1.03); }
+      100% { transform: scale(1);    opacity: 1; }
+    }
+
+    .pop { animation: pop 0.25s ease forwards; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>⚙ Hydraulic Cylinder Calculator</h1>
+  </header>
+
+  <main>
+
+    <!-- INSTALL BANNER -->
+    <div id="install-banner">
+      <div class="banner-inner">
+        📲 Add to Home Screen for app-like experience<br>
+        <span style="color:var(--muted); font-size:0.75rem;">
+          iOS: Share → Add to Home Screen &nbsp;|&nbsp; Android: Menu → Add to Home Screen
+        </span>
+      </div>
+    </div>
+
+    <!-- INPUTS -->
+    <div class="card">
+      <div class="card-label">Inputs</div>
+
+      <div class="field">
+        <label for="bore">Bore Diameter</label>
+        <input id="bore" type="number" inputmode="decimal" placeholder="4.0" step="any" min="0" />
+        <span class="unit">in</span>
+      </div>
+
+      <div class="field">
+        <label for="rod">Rod Diameter</label>
+        <input id="rod" type="number" inputmode="decimal" placeholder="2.5" step="any" min="0" />
+        <span class="unit">in</span>
+      </div>
+
+      <div class="field">
+        <label for="pressure">Pressure</label>
+        <input id="pressure" type="number" inputmode="decimal" placeholder="2500" step="any" min="0" />
+        <span class="unit">PSI</span>
+      </div>
+
+      <div class="field">
+        <label for="flow">Flow Rate</label>
+        <input id="flow" type="number" inputmode="decimal" placeholder="10" step="any" min="0" />
+        <span class="unit">GPM</span>
+      </div>
+    </div>
+
+    <!-- BUTTONS -->
+    <div class="btn-row">
+      <button id="btn-calculate">Calculate</button>
+      <button id="btn-clear">Clear</button>
+    </div>
+
+    <!-- ERROR -->
+    <div class="error-box" id="error-box"></div>
+
+    <!-- RESULTS -->
+    <div class="card">
+      <div class="card-label">Results</div>
+
+      <div class="result-row">
+        <span class="result-label">Extend Force</span>
+        <span class="result-value green" id="extend-force">—</span>
+        <span class="result-unit">lbf</span>
+      </div>
+
+      <div class="result-row">
+        <span class="result-label">Retract Force</span>
+        <span class="result-value yellow" id="retract-force">—</span>
+        <span class="result-unit">lbf</span>
+      </div>
+
+      <div class="result-row">
+        <span class="result-label">Extend Speed</span>
+        <span class="result-value green" id="extend-speed">—</span>
+        <span class="result-unit">in/min</span>
+      </div>
+
+      <div class="result-row">
+        <span class="result-label">Retract Speed</span>
+        <span class="result-value yellow" id="retract-speed">—</span>
+        <span class="result-unit">in/min</span>
+      </div>
+
+      <div class="info-line" id="info-line"></div>
+    </div>
+
+    <footer>Units: inches · PSI · GPM → lbf · in/min</footer>
+
+  </main>
+
+  <script>
+    // ── CALCULATE (same logic as Python original) ──
+    function calculate(bore, rod, pressure, flow) {
+      const PI = Math.PI;
+      const boreArea    = PI * Math.pow(bore / 2, 2);   // in²
+      const rodArea     = PI * Math.pow(rod  / 2, 2);   // in²
+      const annulusArea = boreArea - rodArea;            // in²
+      const flowIn3     = flow * 231;                    // in³/min
+
+      return {
+        extendForce:  pressure * boreArea,
+        retractForce: pressure * annulusArea,
+        extendSpeed:  flowIn3  / boreArea,
+        retractSpeed: flowIn3  / annulusArea,
+        boreArea,
+        annulusArea,
+        flowIn3,
+      };
+    }
+
+    // ── DOM REFS ──
+    const inputs = {
+      bore:     document.getElementById('bore'),
+      rod:      document.getElementById('rod'),
+      pressure: document.getElementById('pressure'),
+      flow:     document.getElementById('flow'),
+    };
+
+    const outputs = {
+      extendForce:  document.getElementById('extend-force'),
+      retractForce: document.getElementById('retract-force'),
+      extendSpeed:  document.getElementById('extend-speed'),
+      retractSpeed: document.getElementById('retract-speed'),
+    };
+
+    const infoLine = document.getElementById('info-line');
+    const errorBox = document.getElementById('error-box');
+
+    function showError(msg) {
+      errorBox.textContent = msg;
+      errorBox.classList.add('visible');
+    }
+
+    function clearError() {
+      errorBox.textContent = '';
+      errorBox.classList.remove('visible');
+    }
+
+    function setResult(el, value) {
+      el.textContent = value;
+      el.classList.remove('pop');
+      void el.offsetWidth; // reflow to restart animation
+      el.classList.add('pop');
+    }
+
+    function resetResults() {
+      Object.values(outputs).forEach(el => { el.textContent = '—'; });
+      infoLine.textContent = '';
+    }
+
+    // ── CALCULATE HANDLER ──
+    document.getElementById('btn-calculate').addEventListener('click', () => {
+      clearError();
+
+      const bore     = parseFloat(inputs.bore.value);
+      const rod      = parseFloat(inputs.rod.value);
+      const pressure = parseFloat(inputs.pressure.value);
+      const flow     = parseFloat(inputs.flow.value);
+
+      // Validation
+      if ([bore, rod, pressure, flow].some(v => isNaN(v))) {
+        showError('Please fill in all four fields.');
+        return;
+      }
+      if ([bore, rod, pressure, flow].some(v => v <= 0)) {
+        showError('All values must be greater than zero.');
+        return;
+      }
+      if (rod >= bore) {
+        showError('Rod diameter must be less than bore diameter.');
+        return;
+      }
+
+      const r = calculate(bore, rod, pressure, flow);
+
+      setResult(outputs.extendForce,  r.extendForce.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }));
+      setResult(outputs.retractForce, r.retractForce.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }));
+      setResult(outputs.extendSpeed,  r.extendSpeed.toFixed(2));
+      setResult(outputs.retractSpeed, r.retractSpeed.toFixed(2));
+
+      infoLine.textContent =
+        `Bore Area: ${r.boreArea.toFixed(3)} in²  |  ` +
+        `Annulus Area: ${r.annulusArea.toFixed(3)} in²  |  ` +
+        `Flow: ${r.flowIn3.toFixed(1)} in³/min`;
+    });
+
+    // ── CLEAR HANDLER ──
+    document.getElementById('btn-clear').addEventListener('click', () => {
+      Object.values(inputs).forEach(el => { el.value = ''; });
+      resetResults();
+      clearError();
+    });
+
+    // ── ENTER KEY ──
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('btn-calculate').click();
+    });
+  </script>
+</body>
+</html>

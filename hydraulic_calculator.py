@@ -1,27 +1,33 @@
 import math
+import tkinter as tk
 from tkinter import messagebox
 
 
 def calculate(bore_in, rod_in, pressure_psi, flow_gpm):
     """
-    Returns extend/retract force (lbf) and speed (in/min).
+    Returns extend/retract force (lbf) and speed (in/min),
+    plus bore_area and annulus_area for display purposes.
+
     flow_gpm: gallons per minute → convert to in³/min (1 gal = 231 in³)
     """
     bore_area = math.pi * (bore_in / 2) ** 2  # in²
     rod_area = math.pi * (rod_in / 2) ** 2  # in²
-    annulus = bore_area - rod_area  # in² (retract side)
+    annulus_area = bore_area - rod_area  # in² (retract side)
     flow_in3 = flow_gpm * 231  # in³/min
 
     extend_force = pressure_psi * bore_area  # lbf
-    retract_force = pressure_psi * annulus  # lbf
+    retract_force = pressure_psi * annulus_area  # lbf
     extend_speed = flow_in3 / bore_area  # in/min
-    retract_speed = flow_in3 / annulus  # in/min
+    retract_speed = flow_in3 / annulus_area  # in/min
 
-    return extend_force, retract_force, extend_speed, retract_speed
-
-
-import tkinter as tk
-from tkinter import ttk
+    return (
+        extend_force,
+        retract_force,
+        extend_speed,
+        retract_speed,
+        bore_area,
+        annulus_area,
+    )
 
 
 def run_gui():
@@ -30,58 +36,71 @@ def run_gui():
     root.resizable(False, False)
 
     # STYLES
-    BG = "#1e2130"
-    CARD = "#272b3d"
-    ACCENT = "#4fc3f7"
-    TEXT = "#e0e6f0"
-    MUTED = "#8a93b0"
-    GREEN = "#69f0ae"
-    YELLOW = "#ffd740"
-    FONT = ("Segoe UI", 10)
-    BOLD = ("Segoe UI", 10, "bold")
-    HEAD = ("Segoe UI", 13, "bold")
+    bg_color = "#1e2130"
+    card_color = "#272b3d"
+    accent_color = "#4fc3f7"
+    text_color = "#e0e6f0"
+    muted_color = "#8a93b0"
+    green_color = "#69f0ae"
+    yellow_color = "#ffd740"
+    font_normal = ("Segoe UI", 10)
+    font_bold = ("Segoe UI", 10, "bold")
+    font_small = ("Segoe UI", 8)
+    font_heading = ("Segoe UI", 8, "bold")
 
-    root.configure(bg=BG)
+    root.configure(bg=bg_color)
 
-    def label(parent, text, **kw):
+    def make_label(parent, text, **kw):
         return tk.Label(
             parent,
             text=text,
-            bg=kw.pop("bg", CARD),
-            fg=kw.pop("fg", TEXT),
-            font=kw.pop("font", FONT),
+            bg=kw.pop("bg", card_color),
+            fg=kw.pop("fg", text_color),
+            font=kw.pop("font", font_normal),
             **kw,
         )
 
-    def entry(parent):
-        e = tk.Entry(
+    def make_entry(parent):
+        return tk.Entry(
             parent,
             bg="#323757",
-            fg=TEXT,
-            font=FONT,
-            insertbackground=ACCENT,
+            fg=text_color,
+            font=font_normal,
+            insertbackground=accent_color,
             relief="flat",
             width=14,
             highlightthickness=1,
-            highlightcolor=ACCENT,
-            highlightbackground=MUTED,
+            highlightcolor=accent_color,
+            highlightbackground=muted_color,
         )
 
-        return e
+    def bind_placeholder(entry_widget, placeholder):
+        def on_focus_in(_event):
+            if entry_widget.get() == placeholder:
+                entry_widget.delete(0, "end")
+                entry_widget.config(fg=text_color)
+
+        def on_focus_out(_event):
+            if entry_widget.get() == "":
+                entry_widget.insert(0, placeholder)
+                entry_widget.config(fg=muted_color)
+
+        entry_widget.bind("<FocusIn>", on_focus_in)
+        entry_widget.bind("<FocusOut>", on_focus_out)
 
     # TITLE BAR
-    title_bar = tk.Frame(root, bg=ACCENT, pady=8)
+    title_bar = tk.Frame(root, bg=accent_color, pady=8)
     title_bar.pack(fill="x")
     tk.Label(
         title_bar,
         text="Hydraulic Cylinder Calculator",
-        bg=ACCENT,
+        bg=accent_color,
         fg="#0d1117",
-        font=("SEGOE UI", 13, "bold"),
+        font=font_bold,
     ).pack()
 
     # INPUT CARD
-    card = tk.Frame(root, bg=CARD, padx=24, pady=20)
+    card = tk.Frame(root, bg=card_color, padx=24, pady=20)
     card.pack(padx=16, pady=(14, 6), fill="x")
 
     fields = [
@@ -93,75 +112,67 @@ def run_gui():
 
     entries = []
 
-    label(card, text="INPUTS", bg=CARD, fg=ACCENT, font=("Segoe UI", 8, "bold")).grid(
+    make_label(card, "INPUTS", bg=card_color, fg=accent_color, font=font_heading).grid(
         row=0, column=0, columnspan=3, sticky="w", pady=(0, 10)
     )
 
+    placeholders = [field[2] for field in fields]
+
     for i, (name, unit, hint) in enumerate(fields):
-        label(card, f"{name}", bg=CARD).grid(row=i + 1, column=0, sticky="w", pady=5)
-        e = entry(card)
+        make_label(card, name, bg=card_color).grid(
+            row=i + 1, column=0, sticky="w", pady=5
+        )
+        e = make_entry(card)
         e.insert(0, hint)
-        e.config(fg=MUTED)
-
-        def on_focus_in(ev, widget=e, placeholder=hint):
-            if widget.get() == placeholder:
-                widget.delete(0, "end")
-                widget.config(fg=TEXT)
-
-        def on_focus_out(ev, widget=e, placeholder=hint):
-            if widget.get() == "":
-                widget.insert(0, placeholder)
-                widget.config(fg=MUTED)
-
-        e.bind("<FocusIn>", on_focus_in)
-        e.bind("<FocusOut>", on_focus_out)
+        e.config(fg=muted_color)
+        bind_placeholder(e, hint)
         e.grid(row=i + 1, column=1, padx=10, pady=5)
-    label(card, unit, bg=CARD, fg=MUTED).grid(row=i + 1, column=2, sticky="w")
-    entries.append(e)
+        make_label(card, unit, bg=card_color, fg=muted_color).grid(
+            row=i + 1, column=2, sticky="w"
+        )
+        entries.append(e)
 
-    bore_e, rod_e, pres_e, flow_e = entries
-
-    #  RESULTS
-    res_card = tk.Frame(root, bg=CARD, padx=24, pady=16)
+    # RESULTS CARD
+    res_card = tk.Frame(root, bg=card_color, padx=24, pady=16)
     res_card.pack(padx=16, pady=6, fill="x")
 
-    label(res_card, "RESULTS", bg=CARD, fg=ACCENT, font=("Segoe UI", 8, "bold")).grid(
-        row=0, column=0, columnspan=3, sticky="w", pady=(0, 8)
-    )
+    make_label(
+        res_card, "RESULTS", bg=card_color, fg=accent_color, font=font_heading
+    ).grid(row=0, column=0, columnspan=3, sticky="w", pady=(0, 8))
 
     result_data = [
-        ("Extend Force", GREEN, "lbf"),
-        ("Retract Force", YELLOW, "lbf"),
-        ("Extend Speed", GREEN, "in/min"),
-        ("Retract Speed", YELLOW, "in/min"),
+        ("Extend Force", green_color, "lbf"),
+        ("Retract Force", yellow_color, "lbf"),
+        ("Extend Speed", green_color, "in/min"),
+        ("Retract Speed", yellow_color, "in/min"),
     ]
     result_vars = [tk.StringVar(value="—") for _ in result_data]
 
     for i, ((name, color, unit), var) in enumerate(zip(result_data, result_vars)):
-        label(res_card, f"{name}", bg=CARD, fg=MUTED).grid(
+        make_label(res_card, name, bg=card_color, fg=muted_color).grid(
             row=i + 1, column=0, sticky="w", pady=4
         )
         tk.Label(
             res_card,
             textvariable=var,
-            bg=CARD,
+            bg=card_color,
             fg=color,
             font=("Segoe UI", 11, "bold"),
             width=12,
             anchor="e",
         ).grid(row=i + 1, column=1, padx=10)
-        label(res_card, unit, bg=CARD, fg=MUTED).grid(row=i + 1, column=2, sticky="w")
+        make_label(res_card, unit, bg=card_color, fg=muted_color).grid(
+            row=i + 1, column=2, sticky="w"
+        )
 
-    # SEPARATOR INFO LINE
+    # INFO LINE
     info_var = tk.StringVar(value="")
     tk.Label(
-        res_card, textvariable=info_var, bg=CARD, fg=MUTED, font=("Segoe UI", 8)
+        res_card, textvariable=info_var, bg=card_color, fg=muted_color, font=font_small
     ).grid(row=6, column=0, columnspan=3, sticky="w", pady=(10, 0))
 
-    # CALCULATE BUTTON
-
+    # CALCULATE BUTTON LOGIC
     def on_calculate():
-        placeholders = [f[2] for f in fields]
         try:
             vals = []
             for e, ph in zip(entries, placeholders):
@@ -171,38 +182,44 @@ def run_gui():
                 vals.append(float(raw))
 
             bore, rod, pres, flow = vals
+
             if rod >= bore:
                 raise ValueError("Rod diameter must be less than bore diameter.")
             if any(v <= 0 for v in vals):
                 raise ValueError("All values must be positive.")
 
-            ef, rf, es, rs = calculate(bore, rod, pres, flow)
+            ef, rf, es, rs, bore_area, annulus_area = calculate(bore, rod, pres, flow)
+            flow_in3 = flow * 231
 
             result_vars[0].set(f"{ef:,.1f}")
             result_vars[1].set(f"{rf:,.1f}")
             result_vars[2].set(f"{es:,.2f}")
             result_vars[3].set(f"{rs:,.2f}")
 
-            bore_area = math.pi * (bore / 2) ** 2
-            rod_area = math.pi * (rod / 2) ** 2
             info_var.set(
-                f"Bore Area: {bore_area:.3f} in² |  "
-                f"Annulus  area: {bore_area - rod_area:.3f} in² |  "
-                f"Flow: {flow * 231:.1f} in³/min"
+                f"Bore Area: {bore_area:.3f} in²  |  "
+                f"Annulus Area: {annulus_area:.3f} in²  |  "
+                f"Flow: {flow_in3:.1f} in³/min"
             )
 
         except ValueError as ex:
             messagebox.showerror("Input Error", str(ex))
 
-    btn_frame = tk.Frame(root, bg=BG, pady=10)
+    def on_clear():
+        for v in result_vars:
+            v.set("—")
+        info_var.set("")
+
+    # BUTTONS
+    btn_frame = tk.Frame(root, bg=bg_color, pady=10)
     btn_frame.pack()
 
-    calc_btn = tk.Button(
+    tk.Button(
         btn_frame,
         text="Calculate",
-        bg=ACCENT,
+        bg=accent_color,
         fg="#0d1117",
-        font=("Segoe UI", 11, "bold"),
+        font=font_bold,
         relief="flat",
         padx=20,
         pady=8,
@@ -210,36 +227,34 @@ def run_gui():
         cursor="hand2",
         activebackground="#81d4fa",
         activeforeground="#0d1117",
-    )
-    calc_btn.pack(side="left", padx=6)
+    ).pack(side="left", padx=6)
 
-    clear_btn = tk.Button(
+    tk.Button(
         btn_frame,
         text="Clear",
-        bg=CARD,
-        fg=MUTED,
-        font=("Segoe UI", 10),
+        bg=card_color,
+        fg=muted_color,
+        font=font_normal,
         relief="flat",
         padx=14,
         pady=8,
-        command=lambda: [v.set("—") for v in result_vars] or info_var.set(""),
+        command=on_clear,
         cursor="hand2",
-    )
-    clear_btn.pack(side="left", padx=6)
+    ).pack(side="left", padx=6)
 
-    # Bind Enter key to calculate
-    root.bind("<Return>", lambda e: on_calculate())
+    root.bind("<Return>", lambda event: on_calculate())
 
     # FOOTER
     tk.Label(
         root,
         text="Units: inches · PSI · GPM → lbf · in/min",
-        bg=BG,
-        fg=MUTED,
-        font=("Segoe UI", 8),
+        bg=bg_color,
+        fg=muted_color,
+        font=font_small,
     ).pack(pady=(0, 10))
 
     root.mainloop()
 
-    if __name__ == "__main__":
-        run_gui()
+
+if __name__ == "__main__":
+    run_gui()
